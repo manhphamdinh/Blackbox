@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+    </style>
+
+    <style name="mainScreenPuzzle">
+        <item name="android:layout_width">75dp</item>
+        <item name="android:layout_height">75dp</item>
+        <item name="android:background">#00000000</item>
+        <item name="android:onClick">puzzleLaunch</item>
+        <item name="android:scaleType">fitXY</item>
+        <item name="srcCompat">@drawable/dot</item>
+    </style>
+
+    <style name="sunRay">
+        <item name="android:layout_width">9dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">@color/puzzle2</item>
+        <item name="android:tag">rays</item>
+        <item name="android:transformPivotX">4.5dp</item>
+        <item name="android:transformPivotY">0dp</item>
+    </style>
+
+    <style name="boxInChallenge">
+        <item name="android:layout_width">75dp</item>
+        <item name="android:layout_height">75dp</item>
+        <item name="android:background">@drawable/blink00</item>
+    </style>
+
+    <style name="centerBoxInChallenge" parent="boxInChallenge">
+        <item name="android:id">@+id/imageView0</item>
+        <item name="android:layout_centerInParent">true</item>
+    </style>
+
+    <style name="corner">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:tint">@color/puzzle6translucent</item>
+        <item name="srcCompat">@drawable/corner</item>
+    </style>
+
+    <style name="linearLayoutForEquallySpacedBoxes">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+</resources>

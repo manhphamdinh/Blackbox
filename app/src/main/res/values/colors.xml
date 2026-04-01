@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="puzzle1">#DE083B</color>
+    <color name="puzzle1translucent">#99DE083B</color>
+    <color name="puzzle2">#FFC837</color>
+    <color name="puzzle3">#FA5F00</color>
+    <color name="puzzle3translucent">#99FA5F00</color>
+    <color name="puzzle4">#FC7B53</color>
+    <color name="puzzle4translucent">#55FC7B53</color>
+    <color name="puzzle5">#5ED5B9</color>
+    <color name="puzzle5translucent">#995ED5B9</color>
+    <color name="puzzle6">#B29DD6</color>
+    <color name="puzzle6translucent">#66B29DD6</color>
+    <color name="puzzle7">#1BA23B</color>
+    <color name="puzzle7translucent">#991BA23B</color>
+    <color name="puzzle8">#7BD207</color>
+    <color name="puzzle8translucent">#997BD207</color>
+    <color name="puzzle8b">#E64E39</color>
+    <color name="puzzle9">#67B7F1</color>
+    <color name="puzzle9translucent">#9967B7F1</color>
+    <color name="puzzle10">#6937FB</color>
+    <color name="puzzle11">#BD5682</color>
+    <color name="puzzle11b">#FCD683</color>
+    <color name="puzzle17">#5477F7</color>
+    <color name="puzzle20">#A12852</color>
+    <color name="puzzle29">#94467C</color>
+</resources>

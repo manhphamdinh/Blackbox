@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <GridLayout
+        android:id="@+id/ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="6">
+
+        <ImageView android:layout_width="75dp" android:layout_height="75dp" />
+
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle9Activity" android:tint="@color/puzzle9" />
+        <ImageView android:layout_width="75dp" android:layout_height="75dp" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle11Activity" android:tint="@color/puzzle11" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle11Activity" android:tint="@color/puzzle11" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle10Activity" android:tint="@color/puzzle10" />
+
+        <ImageView android:layout_width="75dp" android:layout_height="75dp" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle9Activity" android:tint="@color/puzzle9" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle1Activity" android:tint="@color/puzzle1" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle1Activity" android:tint="@color/puzzle1" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle7Activity" android:tint="@color/puzzle7" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle8Activity" android:tint="@color/puzzle8" />
+
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle29Activity" android:tint="@color/puzzle29" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle9Activity" android:tint="@color/puzzle9" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle1Activity" android:tint="@color/puzzle1" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle1Activity" android:tint="@color/puzzle1" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle7Activity" android:tint="@color/puzzle7" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle8Activity" android:tint="@color/puzzle8" />
+
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle5Activity" android:tint="@color/puzzle5" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle6Activity" android:tint="@color/puzzle6" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle1Activity" android:tint="@color/puzzle1" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle1Activity" android:tint="@color/puzzle1" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle20Activity" android:tint="@color/puzzle20" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle8Activity" android:tint="@color/puzzle8" />
+
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle4Activity" android:tint="@color/puzzle4" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle2Activity" android:tint="@color/puzzle2" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle2Activity" android:tint="@color/puzzle2" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle3Activity" android:tint="@color/puzzle3" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle3Activity" android:tint="@color/puzzle3" />
+        <ImageView android:layout_width="75dp" android:layout_height="75dp" />
+
+        <ImageView android:layout_width="75dp" android:layout_height="75dp" />
+        <ImageView android:layout_width="75dp" android:layout_height="75dp" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle17Activity" android:tint="@color/puzzle17" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle3Activity" android:tint="@color/puzzle3" />
+        <ImageButton style="@style/mainScreenPuzzle" android:tag=".Puzzle3Activity" android:tint="@color/puzzle3" />
+        <ImageView android:layout_width="75dp" android:layout_height="75dp" />
+
+    </GridLayout>
+</ScrollView>
