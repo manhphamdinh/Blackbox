@@ -31,15 +31,21 @@ public class Puzzle10Fragment extends PuzzleBaseFragment implements SensorEventL
     public void onResume() {
         super.onResume();
         mSensorManager = (SensorManager) requireContext().getSystemService(Context.SENSOR_SERVICE);
-        mSensorManager.registerListener(this,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
-                SensorManager.SENSOR_DELAY_NORMAL);
+
+        // Kiểm tra sensor trước khi đăng ký để tránh crash
+        Sensor gravity = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+        if (gravity != null) {
+            mSensorManager.registerListener(this, gravity, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
                 == PackageManager.PERMISSION_GRANTED) {
             if (sm == null) {
-                sm = new SoundMeter();
-                sm.start();
+                sm = new SoundMeter(requireContext());
             }
+            try {
+                sm.start();
+            } catch (Exception e) { e.printStackTrace(); }
         }
     }
 
@@ -55,13 +61,26 @@ public class Puzzle10Fragment extends PuzzleBaseFragment implements SensorEventL
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (getView() == null || sm == null) return;
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
+        // 1. Chặn Null sớm
+        if (!isAdded() || getView() == null || sm == null) return;
+
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) return;
 
-        double amp = sm.getAmplitude();
-        WavyLineView view = getView().findViewById(R.id.wavyLineView);
-        view.setAmplitude((int) (90 * amp / 32767));
-        view.setPeriod(0.1f);
+        final double amp = sm.getAmplitude();
+
+        // 2. Chạy trên UI Thread
+        getActivity().runOnUiThread(() -> {
+            View rootView = getView();
+            if (rootView == null) return;
+
+            WavyLineView wavyView = rootView.findViewById(R.id.wavyLineView);
+            if (wavyView != null) {
+                // Tính toán biên độ an toàn
+                int calculatedAmp = (int) (90 * amp / 32767);
+                wavyView.setAmplitude(calculatedAmp);
+                wavyView.setPeriod(0.1f);
+            }
+        });
     }
 }

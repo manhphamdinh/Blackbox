@@ -36,14 +36,22 @@ public class Puzzle9Fragment extends PuzzleBaseFragment implements SensorEventLi
     public void onResume() {
         super.onResume();
         mSensorManager = (SensorManager) requireContext().getSystemService(Context.SENSOR_SERVICE);
-        mSensorManager.registerListener(this,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
-                SensorManager.SENSOR_DELAY_UI);
+
+        // Kiểm tra xem cảm biến có tồn tại không trước khi đăng ký
+        Sensor gravitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+        if (gravitySensor != null) {
+            mSensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_UI);
+        }
+
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
                 == PackageManager.PERMISSION_GRANTED) {
             if (sm == null) {
-                sm = new SoundMeter();
+                sm = new SoundMeter(requireContext());
+            }
+            try {
                 sm.start();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -60,27 +68,54 @@ public class Puzzle9Fragment extends PuzzleBaseFragment implements SensorEventLi
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (getView() == null || sm == null) return;
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
+        // 1. Kiểm tra Fragment còn gắn vào Activity không
+        if (!isAdded() || getContext() == null || getView() == null || sm == null) return;
+
+        // 2. Kiểm tra quyền ghi âm
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) return;
 
-        double amp = sm.getAmplitude();
-        if (amp > (22000 - THRESHOLD)) animation(0);
-        if (Math.abs(amp - 10000) < THRESHOLD) animation(1);
-        if (amp < THRESHOLD) animation(2);
+        final double amp = sm.getAmplitude();
 
-        int deviceHeight = MainActivity.getDeviceHeightAndWidth(requireContext()).first;
-        int deviceWidth = MainActivity.getDeviceHeightAndWidth(requireContext()).second;
-        ((ViewGroup) getView().findViewById(R.id.merge)).removeAllViews();
-        for (int i = 0; i < amp / 3000; i++) {
-            ImageView imageView = new ImageView(requireContext());
-            imageView.setImageResource(R.drawable.circle);
-            imageView.setColorFilter(ContextCompat.getColor(requireContext(), R.color.puzzle9translucent));
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ballSize, ballSize);
-            params.topMargin = (int) (Math.random() * (deviceHeight - ballSize));
-            params.leftMargin = (int) (Math.random() * (deviceWidth - ballSize));
-            imageView.setLayoutParams(params);
-            ((RelativeLayout) getView().findViewById(R.id.merge)).addView(imageView, 0);
-        }
+        // 3. Chuyển sang UI Thread
+        getActivity().runOnUiThread(() -> {
+            View rootView = getView();
+            Context safeContext = getContext();
+            if (rootView == null || safeContext == null) return;
+
+            if (amp > 0) {
+                if (amp > (22000 - THRESHOLD)) animation(0);
+                if (Math.abs(amp - 10000) < THRESHOLD) animation(1);
+                if (amp > 0.001 && amp < THRESHOLD) animation(2);
+            }
+
+            RelativeLayout mergeLayout = rootView.findViewById(R.id.merge);
+            if (mergeLayout != null) {
+                mergeLayout.removeAllViews();
+
+                int numBalls = Math.min((int) (amp / 3000), 10);
+
+                // Dùng safeContext thay vì requireContext()
+                var sizeData = MainActivity.getDeviceHeightAndWidth(safeContext);
+                int deviceHeight = sizeData.first;
+                int deviceWidth = sizeData.second;
+
+                for (int i = 0; i < numBalls; i++) {
+                    ImageView imageView = new ImageView(safeContext);
+                    imageView.setImageResource(R.drawable.circle);
+                    imageView.setColorFilter(ContextCompat.getColor(safeContext, R.color.puzzle9translucent));
+
+                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ballSize, ballSize);
+                    // Đảm bảo không bị số âm khi random
+                    int maxTop = Math.max(1, deviceHeight - ballSize);
+                    int maxLeft = Math.max(1, deviceWidth - ballSize);
+
+                    params.topMargin = (int) (Math.random() * maxTop);
+                    params.leftMargin = (int) (Math.random() * maxLeft);
+
+                    mergeLayout.addView(imageView);
+                }
+            }
+        });
     }
 }

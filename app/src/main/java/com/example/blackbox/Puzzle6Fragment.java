@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.core.content.ContextCompat;
+
 public class Puzzle6Fragment extends PuzzleBaseFragment {
 
     private BroadcastReceiver receiver;
@@ -32,7 +34,9 @@ public class Puzzle6Fragment extends PuzzleBaseFragment {
         };
         IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         filter.addDataScheme("file");
-        requireContext().registerReceiver(receiver, filter);
+        int flags = ContextCompat.RECEIVER_EXPORTED;
+
+        ContextCompat.registerReceiver(requireContext(), receiver, filter, flags);
     }
 
     @Override

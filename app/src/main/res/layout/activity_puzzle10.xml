@@ -8,13 +8,13 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:orientation="vertical"
-    tools:context="com.patmyron.blackbox.Puzzle10Activity">
+    tools:context="com.example.blackbox.Puzzle10Fragment">
 
     <ImageView
         style="@style/centerBoxInChallenge"
         android:backgroundTint="@color/puzzle10" />
 
-    <com.patmyron.blackbox.WavyLineView
+    <com.example.blackbox.WavyLineView
         android:id="@+id/wavyLineView"
         android:layout_width="match_parent"
         android:layout_height="200dp"
