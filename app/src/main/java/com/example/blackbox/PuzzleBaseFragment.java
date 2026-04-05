@@ -18,37 +18,37 @@ public abstract class PuzzleBaseFragment extends Fragment {
     protected void animation(int index) {
         Activity activity = getActivity();
         if (activity == null) return;
-        ImageView iv = activity.findViewById(
-                activity.getResources().getIdentifier("imageView" + index, "id", activity.getPackageName())
+        activity.runOnUiThread(() -> {
+            ImageView iv = activity.findViewById(
+                    activity.getResources().getIdentifier("imageView" + index, "id", activity.getPackageName())
+            );
+            if (iv == null) return;
+            iv.setBackgroundResource(R.drawable.animation);
+            ((AnimationDrawable) iv.getBackground()).start();
+            saveBoxCompleted(index);
+        });
+    }
+
+    private void saveBoxCompleted(int boxIndex) {
+        Context context = getContext();
+        if (context == null) return;
+        String key = getPuzzleId() + ":" + boxIndex;
+        SharedPreferences pref = context.getSharedPreferences(
+                getString(R.string.pref), Context.MODE_PRIVATE
         );
-        if (iv == null) return;
-        iv.setBackgroundResource(R.drawable.animation);
-        ((AnimationDrawable) iv.getBackground()).start();
-        puzzleCompleted();
+        String existing = pref.getString(getString(R.string.prefSolved), "[]");
+        try {
+            JSONArray jsonArray = new JSONArray(existing);
+            // cek apakah sudah ada
+            for (int i = 0; i < jsonArray.length(); i++) {
+                if (jsonArray.getString(i).equals(key)) return; // sudah ada
+            }
+            jsonArray.put(key);
+            pref.edit().putString(getString(R.string.prefSolved), jsonArray.toString()).apply();
+        } catch (JSONException ignored) {}
     }
 
     protected abstract int getPuzzleId();
 
-    protected void puzzleCompleted() {
-        Context context = getContext();
-        if (context == null) return;
-        String prefString = getString(R.string.prefSolved);
-        SharedPreferences pref = context.getSharedPreferences(
-                getString(R.string.pref), Context.MODE_PRIVATE
-        );
-        try {
-            String existing = pref.getString(prefString, "[]");
-            JSONArray jsonArray = new JSONArray(existing);
-            HashSet<Integer> set = new HashSet<>();
-            for (int i = 0; i < jsonArray.length(); i++) {
-                set.add(jsonArray.getInt(i));
-            }
-            set.add(getPuzzleId());
-            JSONArray newArray = new JSONArray();
-            for (int val : set) {
-                newArray.put(val);
-            }
-            pref.edit().putString(prefString, newArray.toString()).apply();
-        } catch (JSONException ignored) {}
-    }
+// Xóa hàm puzzleCompleted() cũ đi
 }

@@ -11,6 +11,7 @@ import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,16 +62,23 @@ public class MainActivity extends AppCompatActivity {
         String solved = pref.getString(getString(R.string.prefSolved), "[]");
         try {
             JSONArray jsonArray = new JSONArray(solved);
-            HashSet<Integer> set = new HashSet<>();
+            HashSet<String> solvedBoxes = new HashSet<>();
             for (int i = 0; i < jsonArray.length(); i++) {
-                set.add(jsonArray.getInt(i));
+                solvedBoxes.add(jsonArray.getString(i));
             }
-            for (Integer i : set) {
-                ArrayList<ImageView> ivs = getViewsByTag(
-                        (ViewGroup) findViewById(R.id.ll), ".Puzzle" + i + "Activity"
-                );
-                for (ImageView iv : ivs) {
-                    iv.setImageResource(R.drawable.filled);
+
+            ViewGroup grid = findViewById(R.id.ll);
+            int childCount = grid.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = grid.getChildAt(i);
+                if (!(child instanceof ImageButton)) continue;
+                Object tag = child.getTag();
+                if (tag == null) continue;
+                String tagStr = tag.toString(); // dạng "1:0"
+                if (solvedBoxes.contains(tagStr)) {
+                    ((ImageView) child).setImageResource(R.drawable.filled);
+                } else {
+                    ((ImageView) child).setImageResource(R.drawable.dot);
                 }
             }
         } catch (JSONException ignored) {}
@@ -78,9 +86,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void puzzleLaunch(View view) {
         String tag = (String) view.getTag();
-        // tag dạng ".Puzzle1Activity" → lấy số puzzle
-        String numberStr = tag.replaceAll("[^0-9]", "");
-        int puzzleId = Integer.parseInt(numberStr);
+        // tag dạng "1:0" → lấy phần trước dấu ":"
+        String puzzleIdStr = tag.split(":")[0];
+        int puzzleId = Integer.parseInt(puzzleIdStr);
         Intent intent = new Intent(this, PuzzleActivity.class);
         intent.putExtra(PuzzleActivity.EXTRA_PUZZLE_ID, puzzleId);
         startActivity(intent);

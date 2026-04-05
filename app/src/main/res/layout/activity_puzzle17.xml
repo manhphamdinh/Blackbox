@@ -10,7 +10,24 @@
     tools:context="com.patmyron.blackbox.Puzzle17Activity">
 
     <ImageView
+        android:id="@+id/imageView0"
         style="@style/centerBoxInChallenge"
-        android:backgroundTint="@color/puzzle17" />
+        android:backgroundTint="@color/puzzle17"
+        android:layout_centerInParent="true"/>
 
+    <TextView
+        android:id="@+id/tvUndo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="undo"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/imageView0"/>
+
+    <TextView
+        android:id="@+id/tvThis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="this."
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/imageView0"/>
 </RelativeLayout>
