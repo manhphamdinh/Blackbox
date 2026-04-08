@@ -39,9 +39,8 @@ public abstract class PuzzleBaseFragment extends Fragment {
         String existing = pref.getString(getString(R.string.prefSolved), "[]");
         try {
             JSONArray jsonArray = new JSONArray(existing);
-            // cek apakah sudah ada
             for (int i = 0; i < jsonArray.length(); i++) {
-                if (jsonArray.getString(i).equals(key)) return; // sudah ada
+                if (jsonArray.getString(i).equals(key)) return;
             }
             jsonArray.put(key);
             pref.edit().putString(getString(R.string.prefSolved), jsonArray.toString()).apply();
@@ -50,5 +49,4 @@ public abstract class PuzzleBaseFragment extends Fragment {
 
     protected abstract int getPuzzleId();
 
-// Xóa hàm puzzleCompleted() cũ đi
 }
