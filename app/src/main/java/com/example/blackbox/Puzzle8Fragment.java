@@ -17,11 +17,8 @@ import androidx.core.content.ContextCompat;
 public class Puzzle8Fragment extends PuzzleBaseFragment {
 
     private static final double LOW_THRESHOLD = 3.0;
-
     private static final double HIGH_THRESHOLD = 99.0;
-
     private static final double THRESHOLD_TOLERANCE = 0.05;
-
     private final double ballSize = 100.0;
     private BroadcastReceiver receiver;
 
@@ -38,7 +35,9 @@ public class Puzzle8Fragment extends PuzzleBaseFragment {
         super.onResume();
         receiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-                if (getView() == null) return;
+                if (getView() == null) {
+                    return;
+                }
 
                 int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
                 boolean isCharging = (status == BatteryManager.BATTERY_STATUS_CHARGING)

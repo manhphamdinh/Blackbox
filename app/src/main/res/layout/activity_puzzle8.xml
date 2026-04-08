@@ -22,7 +22,7 @@
         android:orientation="vertical"
         android:clipChildren="false"
         android:clipToPadding="false"
-        tools:context="com.patmyron.blackbox.Puzzle8Activity">
+        tools:context=".Puzzle8Fragment">
 
         <LinearLayout style="@style/linearLayoutForEquallySpacedBoxes">
             <ImageView

@@ -1,5 +1,6 @@
 package com.example.blackbox;
 
+import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,12 +12,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 
 public class Puzzle3Fragment extends PuzzleBaseFragment {
 
     private BroadcastReceiver audioReceiver;
     private AudioDeviceCallback audioDeviceCallback;
+    private ValueAnimator fluidAnimator;
     private final Runnable stateChecker = new Runnable() {
         @Override
         public void run() {
@@ -54,7 +57,7 @@ public class Puzzle3Fragment extends PuzzleBaseFragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-        filter.addAction("android.media.VOLUME_CHANGED_ACTION"); // still works
+        filter.addAction("android.media.VOLUME_CHANGED_ACTION");
         filter.addAction(Intent.ACTION_HEADSET_PLUG);
 
         requireContext().registerReceiver(audioReceiver, filter);
@@ -103,9 +106,6 @@ public class Puzzle3Fragment extends PuzzleBaseFragment {
     }
 
     private void updateState() {
-        View root = getView();
-        if (root == null) return;
-
         AudioManager audioManager =
                 (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
 
@@ -129,28 +129,62 @@ public class Puzzle3Fragment extends PuzzleBaseFragment {
 
         boolean isSilent =
                 audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT
-                        || volume == 0;
+                || audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE;
 
-        // ---- Priority logic ----
-        if (isSilent) {
-            animation(3);
-        } else if (isHeadphonesOn) {
-            animation(2);
-        } else if (volume == max) {
+        if (volume == max) {
             animation(0);
-        } else {
+        }
+
+        if (volume == 0) {
             animation(1);
         }
 
+        if (isHeadphonesOn) {
+            animation(2);
+        }
+
+        if (isSilent) {
+            animation(3);
+        }
+
         // ---- Fluid UI ----
+        updateFluid(volume, max);
+    }
+
+    private int lastHeight = -1;
+    private void updateFluid(int volume, int max) {
+        View root = getView();
+        if (root == null) return;
+
         ImageView fluid = root.findViewById(R.id.fluid);
 
-        int deviceHeight = MainActivity.getDeviceHeightAndWidth(requireContext()).first;
+        int deviceHeight = MainActivity
+                .getDeviceHeightAndWidth(requireContext()).first;
 
-        ViewGroup.MarginLayoutParams params =
-                (ViewGroup.MarginLayoutParams) fluid.getLayoutParams();
+        float ratio = max > 0 ? (float) volume / max : 0;
+        int targetHeight = (int) (deviceHeight * ratio);
 
-        params.height = (int) (deviceHeight * ((float) volume / max));
-        fluid.setLayoutParams(params);
+        ViewGroup.LayoutParams params = fluid.getLayoutParams();
+        if (lastHeight == targetHeight) {
+            return;
+        }
+        lastHeight = targetHeight;
+
+        int startHeight = params.height;
+
+        if (fluidAnimator != null && fluidAnimator.isRunning()) {
+            fluidAnimator.cancel();
+        }
+
+        fluidAnimator = ValueAnimator.ofInt(startHeight, targetHeight);
+        fluidAnimator.setDuration(300);
+        fluidAnimator.setInterpolator(new DecelerateInterpolator());
+
+        fluidAnimator.addUpdateListener(animation -> {
+            params.height = (int) animation.getAnimatedValue();
+            fluid.setLayoutParams(params);
+        });
+
+        fluidAnimator.start();
     }
 }
