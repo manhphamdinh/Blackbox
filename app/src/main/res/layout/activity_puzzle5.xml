@@ -11,6 +11,7 @@
     tools:context=".Puzzle5Fragment">
 
     <ImageView
+        android:id="@+id/imageView0"
         style="@style/centerBoxInChallenge"
         android:backgroundTint="@color/puzzle5" />
 
@@ -18,9 +19,9 @@
         android:id="@+id/wifi"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_above="@id/imageView0"
+        android:layout_above="@+id/imageView0"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="-45dp"
+        android:layout_marginBottom="45dp"
         android:background="@drawable/wifi"
         android:scaleType="fitXY"
         app:tint="@color/puzzle5" />
