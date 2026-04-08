@@ -6,10 +6,17 @@
     android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false"
-    tools:context="com.example.blackbox.Puzzle7Fragment">
+    android:orientation="vertical"
+    tools:context=".Puzzle7Fragment">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/puzzle7translucent" />
 
     <!-- Hình tròn ở giữa (sẽ set màu đen trong code) -->
     <ImageView
+        android:id="@+id/imageView0"
         style="@style/centerBoxInChallenge"
         android:backgroundTint="@color/puzzle7" />
 
