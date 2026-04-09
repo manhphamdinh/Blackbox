@@ -18,7 +18,7 @@ public abstract class PuzzleBaseFragment extends Fragment {
         if (activity == null) return;
         activity.runOnUiThread(() -> {
             ImageView imageView = activity.findViewById(
-                activity.getResources().getIdentifier("imageView" + index, "id", activity.getPackageName())
+                    activity.getResources().getIdentifier("imageView" + index, "id", activity.getPackageName())
             );
 
             if (imageView == null) return;
