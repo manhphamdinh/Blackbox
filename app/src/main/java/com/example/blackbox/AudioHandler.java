@@ -1,17 +1,21 @@
 package com.example.blackbox;
 
 import android.content.Context;
-import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.net.Uri;
+
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.common.Player;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-public class AudioManager {
-    private static final int SOUND_POOL_MAX_STREAMS = 5;
-    private static final int BGM_MAIN = R.raw.bgm_73bpm;    // Fuck magic values
+public class AudioHandler {
+    private static final int SOUND_POOL_MAX_STREAMS = 10;
+    private static final int BGM_MAIN = R.raw.bgm_73bpm;
 
-    private static MediaPlayer bgm;
+    private static ExoPlayer bgm;
     private static SoundPool soundPool;
 
     private enum SFX {
@@ -40,9 +44,7 @@ public class AudioManager {
     private static final Map<SFX, Sound> sounds = new EnumMap<>(SFX.class);
 
     public static void init(Context context) {
-        if (soundPool != null) {
-            return;
-        }
+        if (soundPool != null && !sounds.isEmpty()) return;
 
         soundPool = new SoundPool.Builder().setMaxStreams(SOUND_POOL_MAX_STREAMS).build();
 
@@ -93,12 +95,18 @@ public class AudioManager {
     // BGM METHODS
     public static void startBgm(Context context) {
         if (bgm == null) {
-            bgm = MediaPlayer.create(context.getApplicationContext(), BGM_MAIN);
-            bgm.setLooping(true);
+            bgm = new ExoPlayer.Builder(context.getApplicationContext()).build();
+
+            Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/" + BGM_MAIN);
+            MediaItem mediaItem = MediaItem.fromUri(uri);
+
+            bgm.setMediaItem(mediaItem);
+            bgm.setRepeatMode(Player.REPEAT_MODE_ONE); // 🔥 seamless loop
+            bgm.prepare();
         }
 
         if (!bgm.isPlaying()) {
-            bgm.start();
+            bgm.play();
         }
     }
 
