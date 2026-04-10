@@ -87,34 +87,34 @@ public class Puzzle15Fragment extends PuzzleBaseFragment {
         if (totalDistance >= 10 && !isSolved[0]) {
             isSolved[0] = true;
             radarView.setSolved(0);
-            animation(0);
+            saveBoxCompleted(0);
         }
         if (totalDistance >= 100 && !isSolved[1]) {
             isSolved[1] = true;
             radarView.setSolved(1);
-            animation(1);
+            saveBoxCompleted(1);
         }
         if (totalDistance >= 1000 && !isSolved[2]) {
             isSolved[2] = true;
             radarView.setSolved(2);
-            animation(2);
+            saveBoxCompleted(2);
         }
         if (totalDistance >= 10000 && !isSolved[3]) {
             isSolved[3] = true;
             radarView.setSolved(3);
-            animation(3);
+            saveBoxCompleted(3);
+
             if (locationManager != null) {
                 locationManager.removeUpdates(locationListener);
             }
 
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 if (getActivity() != null && isAdded()) {
-                    getActivity().finish();
+                    getActivity().onBackPressed();
                 }
             }, 1500);
         }
     }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();

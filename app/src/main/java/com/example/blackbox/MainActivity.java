@@ -99,11 +99,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void resetGame(View view) {
-        SharedPreferences pref = getSharedPreferences(getString(R.string.pref), MODE_PRIVATE);
-        pref.edit().putString(getString(R.string.prefSolved), "[]").apply();
-        pref.edit().putFloat("puzzle15_distance", 0f).apply();
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Xác nhận Reset")
+                .setMessage("Hành động này sẽ xóa toàn bộ tiến trình chơi của bạn. Bạn có chắc chắn không?")
+                .setPositiveButton("Xóa hết", (dialog, which) -> {
+                    SharedPreferences pref = getSharedPreferences(getString(R.string.pref), MODE_PRIVATE);
+                    pref.edit().putString(getString(R.string.prefSolved), "[]").apply();
+                    pref.edit().putFloat("puzzle15_distance", 0f).apply();
 
-        recreate();
+                    recreate();
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
     }
 }
 

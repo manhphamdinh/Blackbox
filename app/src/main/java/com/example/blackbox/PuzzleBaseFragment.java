@@ -28,7 +28,7 @@ public abstract class PuzzleBaseFragment extends Fragment {
         });
     }
 
-    private void saveBoxCompleted(int boxIndex) {
+    protected void saveBoxCompleted(int boxIndex) {
         Context context = getContext();
         if (context == null) return;
         String key = getPuzzleId() + ":" + boxIndex;

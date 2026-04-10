@@ -257,7 +257,7 @@ public class Puzzle7Fragment extends PuzzleBaseFragment {
     private static final String PREF_CLOCK_AM = "prefClockAM";
     private static final String PREF_CLOCK_PM = "prefClockPM";
 
-    private void saveBoxCompleted(int boxIndex) {
+    protected void saveBoxCompleted(int boxIndex) {
         Context context = getContext();
         if (context == null) return;
         String key = getPuzzleId() + ":" + boxIndex;
