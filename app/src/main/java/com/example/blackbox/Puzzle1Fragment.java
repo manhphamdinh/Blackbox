@@ -117,23 +117,23 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
                 gravityZ * gravityZ
         );
 
-        // UPDATE FLUID UI
+        // UPDATE FLUID AND BUBBLES UI
         fluid.setGravity(gravityX, gravityY);
 
         updateBubbles(maxGravity, gravityZ, bubbleTop, bubbleBottom);
 
         // Kiểm tra hoàn thành puzzle
         if (gravityX < -THRESHOLD) {
-            updatePuzzle(boxes[RIGHT], RIGHT);
-        }
-        if (gravityX > THRESHOLD) {
             updatePuzzle(boxes[LEFT], LEFT);
         }
+        if (gravityX > THRESHOLD) {
+            updatePuzzle(boxes[RIGHT], RIGHT);
+        }
         if (gravityY < -THRESHOLD) {
-            updatePuzzle(boxes[TOP], TOP);
+            updatePuzzle(boxes[BOTTOM], BOTTOM);
         }
         if (gravityY > THRESHOLD) {
-            updatePuzzle(boxes[BOTTOM], BOTTOM);
+            updatePuzzle(boxes[TOP], TOP);
         }
         if (gravityZ < -THRESHOLD) {
             updatePuzzle(boxes[MIDDLE_TOP], MIDDLE_TOP);
@@ -157,24 +157,24 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
         float topStart = -bubbleTop.getHeight();
         float bottomStart = parentHeight + bubbleBottom.getHeight();
 
-        // TARGETS
+        // BUBBLE TARGETS (BOXES)
         float topBubbleTarget =
-                boxes[MIDDLE_BOTTOM].getY() + boxes[MIDDLE_BOTTOM].getHeight() / 2f
+                boxes[MIDDLE_TOP].getY() + boxes[MIDDLE_TOP].getHeight() / 2f
                         - bubbleTop.getHeight() / 2f;
 
         float bottomBubbleTarget =
-                boxes[MIDDLE_TOP].getY() + boxes[MIDDLE_TOP].getHeight() / 2f
+                boxes[MIDDLE_BOTTOM].getY() + boxes[MIDDLE_BOTTOM].getHeight() / 2f
                         - bubbleBottom.getHeight() / 2f;
 
-        // --- Top bubble (positive Z → goes to imageView5)
-        float topProgress = Math.max(0f, normalizedGravityZ);
-        float topY = topStart + (topBubbleTarget - topStart) * topProgress;
+        // Top bubble
+        float topController = Math.max(0f, normalizedGravityZ);
+        float topNewPositionY = topStart + (topBubbleTarget - topStart) * topController;
 
-        // --- Bottom bubble (negative Z → goes to imageView4)
-        float bottomProgress = Math.max(0f, -normalizedGravityZ);
-        float bottomY = bottomStart + (bottomBubbleTarget - bottomStart) * bottomProgress;
+        // Bottom bubble
+        float bottomController = Math.max(0f, -normalizedGravityZ);
+        float bottomNewPositionY = bottomStart + (bottomBubbleTarget - bottomStart) * bottomController;
 
-        bubbleTop.setY(topY);
-        bubbleBottom.setY(bottomY);
+        bubbleTop.setY(topNewPositionY);
+        bubbleBottom.setY(bottomNewPositionY);
     }
 }

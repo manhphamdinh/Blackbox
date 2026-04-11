@@ -1,10 +1,10 @@
 package com.example.blackbox;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,17 +17,14 @@ import androidx.annotation.Nullable;
 public class Puzzle29Fragment extends PuzzleBaseFragment {
 
     private ImageView holdBox;
-    private View bg;
+    private View backGround;
 
-    // Duration the user must hold to complete the puzzle
-    private static final int THRESHOLD = 5000; // ms
+    // How long the user must hold (ms)
+    private static final int HOLD_DURATION_MS = 3000;
 
-    // Handler tied to main thread for delayed completion trigger
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
-    private Runnable holdRunnable;
-    private ValueAnimator colorAnimator;
-
+    private ValueAnimator backGroundAnimator;
+    private final int backgroundStartColor = Color.parseColor("#000000");
+    private final int backGroundEndColor = Color.parseColor("#AA94467C");
     @Override
     protected int getTotalBoxes() {
         return 1;
@@ -43,7 +40,7 @@ public class Puzzle29Fragment extends PuzzleBaseFragment {
         View root = inflater.inflate(R.layout.activity_puzzle29, container, false);
 
         holdBox = root.findViewById(R.id.imageView0);
-        bg = root.findViewById(R.id.bg);
+        backGround = root.findViewById(R.id.bg);
 
         return root;
     }
@@ -54,81 +51,74 @@ public class Puzzle29Fragment extends PuzzleBaseFragment {
 
         view.setOnTouchListener((v, event) -> {
             switch (event.getActionMasked()) {
-
                 case MotionEvent.ACTION_DOWN:
-                    startHold();
+                    startHoldAnimation();
+
                     return true;
 
                 case MotionEvent.ACTION_UP:
-                    cancelHold();
-                    resetBackground();
-
-                    // Ensures accessibility + click listeners still work
+                    cancelHoldAnimation();
+                    resetBackgroundColor();
                     v.performClick();
+
                     return true;
 
                 case MotionEvent.ACTION_CANCEL:
-                    // Happens when touch is interrupted (e.g., parent intercepts)
-                    cancelHold();
-                    resetBackground();
+
+                    cancelHoldAnimation();
+                    resetBackgroundColor();
+
                     return true;
             }
             return false;
         });
     }
 
-    private void startHold() {
-        // Start visual feedback immediately
-        startColorAnimation();
-
-        // If user holds long enough, mark puzzle as completed
-        holdRunnable = () -> updatePuzzle(holdBox);
-        handler.postDelayed(holdRunnable, THRESHOLD);
-    }
-
-    private void cancelHold() {
-        // Prevent completion if user releases early
-        if (holdRunnable != null) {
-            handler.removeCallbacks(holdRunnable);
-        }
-
-        stopColorAnimation();
-    }
-
-    private void startColorAnimation() {
-        int startColor = Color.TRANSPARENT;
-        int endColor = Color.parseColor("#9994467C");
-
-        colorAnimator = ValueAnimator.ofArgb(startColor, endColor);
-        colorAnimator.setDuration(THRESHOLD);
-
-        // Gradually darken background while holding
-        colorAnimator.addUpdateListener(animation ->
-                bg.setBackgroundColor((int) animation.getAnimatedValue())
-        );
-
-        colorAnimator.start();
-    }
-
-    private void stopColorAnimation() {
-        if (colorAnimator != null) {
-            colorAnimator.cancel();
+    // HOLD ANIMATIONS
+    private void cancelHoldAnimation() {
+        if (backGroundAnimator != null) {
+            backGroundAnimator.cancel(); // prevents completion trigger
         }
     }
 
-    private void resetBackground() {
-        // Restore original background color when hold is cancelled
-        bg.setBackgroundColor(
-                requireContext().getResources().getColor(R.color.bg, null)
+    private void startHoldAnimation() {
+        cancelHoldAnimation();
+
+        backGroundAnimator = ValueAnimator.ofArgb(backgroundStartColor, backGroundEndColor);
+        backGroundAnimator.setDuration(HOLD_DURATION_MS);
+
+        backGroundAnimator.addUpdateListener(animation ->
+                backGround.setBackgroundColor((int) animation.getAnimatedValue())
         );
+
+        // Animation can end by either cancel or complete it, this ensures that
+        // Only by completing would the puzzle get updated
+        backGroundAnimator.addListener(new AnimatorListenerAdapter() {
+            private boolean wasCancelled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                wasCancelled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!wasCancelled) {
+                    updatePuzzle(holdBox);
+                }
+            }
+        });
+
+        backGroundAnimator.start();
+    }
+
+    private void resetBackgroundColor() {
+        backGround.setBackgroundColor(backgroundStartColor);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        // Avoid leaks and orphan callbacks when view is destroyed
-        cancelHold();
-        stopColorAnimation();
+        cancelHoldAnimation();
     }
 }
