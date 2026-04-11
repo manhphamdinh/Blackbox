@@ -57,7 +57,6 @@ public class Puzzle10Fragment extends PuzzleBaseFragment {
                 == PackageManager.PERMISSION_GRANTED) {
             setupSpeechRecognizer();
         } else {
-            // Xin quyền nếu chưa có
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 100);
         }
     }
@@ -68,7 +67,6 @@ public class Puzzle10Fragment extends PuzzleBaseFragment {
             return;
         }
 
-        // Hủy instance cũ nếu có để tránh kẹt bộ nhớ
         if (speechRecognizer != null) {
             speechRecognizer.destroy();
         }
@@ -82,7 +80,6 @@ public class Puzzle10Fragment extends PuzzleBaseFragment {
 
         // Bật tính năng trả kết quả ngay khi đang nói
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
-
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
             public void onReadyForSpeech(Bundle params) {
@@ -146,7 +143,7 @@ public class Puzzle10Fragment extends PuzzleBaseFragment {
             @Override
             public void onEvent(int eventType, Bundle params) {}
 
-            // Sửa hàm này thành kiểu trả về boolean để biết đã thắng hay chưa
+
             private boolean processSpeechResults(Bundle results) {
                 if (isPuzzleCompletedThisRun()) return true;
 
@@ -184,11 +181,11 @@ public class Puzzle10Fragment extends PuzzleBaseFragment {
                         }
                     }
                 }
-                return false; // Chưa thắng
+                return false;
             }
         });
 
-        // Bắt đầu lắng nghe ngay lập tức (Giữ nguyên dòng này ở cuối hàm setupSpeechRecognizer)
+
         speechRecognizer.startListening(speechRecognizerIntent);
     }
 

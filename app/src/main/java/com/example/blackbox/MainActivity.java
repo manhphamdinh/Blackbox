@@ -132,4 +132,20 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(PuzzleActivity.EXTRA_PUZZLE_ID, puzzleId);
         startActivity(intent);
     }
+
+    public void resetGame(View view) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Xác nhận Reset")
+                .setMessage("Hành động này sẽ xóa toàn bộ tiến trình chơi của bạn. Bạn có chắc chắn không?")
+                .setPositiveButton("Xóa hết", (dialog, which) -> {
+                    SharedPreferences pref = getSharedPreferences(getString(R.string.pref), MODE_PRIVATE);
+                    pref.edit().putString(getString(R.string.prefSolved), "[]").apply();
+                    pref.edit().putFloat("puzzle15_distance", 0f).apply();
+
+                    recreate();
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
 }
+

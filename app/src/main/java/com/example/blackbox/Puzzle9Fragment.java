@@ -79,7 +79,6 @@ public class Puzzle9Fragment extends PuzzleBaseFragment {
     public void onResume() {
         super.onResume();
 
-        // KIỂM TRA QUYỀN VÀ KHỞI CHẠY MIC
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
                 == PackageManager.PERMISSION_GRANTED) {
 
@@ -107,7 +106,7 @@ public class Puzzle9Fragment extends PuzzleBaseFragment {
                 @Override
                 public void run() {
                     updateMicUI();
-                    handler.postDelayed(this, 50); // Lặp lại liên tục sau mỗi 50ms
+                    handler.postDelayed(this, 50);
                 }
             };
         }
