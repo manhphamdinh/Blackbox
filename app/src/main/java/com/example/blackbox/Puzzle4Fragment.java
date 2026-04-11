@@ -29,7 +29,6 @@ public class Puzzle4Fragment extends PuzzleBaseFragment implements SensorEventLi
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         View root = inflater.inflate(R.layout.activity_puzzle4, container, false);
 
         proximityBox = root.findViewById(R.id.imageView0);

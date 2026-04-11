@@ -83,7 +83,6 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
         for (int index : getCompletedThisRun()) {
             applyCurrentProgress(boxes[index]);
         }
-
     }
 
     @Override
@@ -126,27 +125,21 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
         // Kiểm tra hoàn thành puzzle
         if (gravityX < -THRESHOLD) {
             updatePuzzle(boxes[RIGHT], RIGHT);
-            Log.d("PUZZLE_1", "NEGATIVE X");
         }
         if (gravityX > THRESHOLD) {
             updatePuzzle(boxes[LEFT], LEFT);
-            Log.d("PUZZLE_1", "POSITIVE X");
         }
         if (gravityY < -THRESHOLD) {
             updatePuzzle(boxes[TOP], TOP);
-            Log.d("PUZZLE_1", "NEGATIVE Y");
         }
         if (gravityY > THRESHOLD) {
             updatePuzzle(boxes[BOTTOM], BOTTOM);
-            Log.d("PUZZLE_1", "POSITIVE Y");
         }
         if (gravityZ < -THRESHOLD) {
             updatePuzzle(boxes[MIDDLE_TOP], MIDDLE_TOP);
-            Log.d("PUZZLE_1", "NEGATIVE Z");
         }
         if (gravityZ > THRESHOLD) {
             updatePuzzle(boxes[MIDDLE_BOTTOM], MIDDLE_BOTTOM);
-            Log.d("PUZZLE_1", "POSITIVE Z");
         }
 
         getView().findViewById(R.id.ll).invalidate();
