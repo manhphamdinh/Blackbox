@@ -1,17 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A1A3A"> <com.example.blackbox.DistanceRadarView
-    android:id="@+id/radarView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    tools:context=".Puzzle15Fragment">
 
-    <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="184dp"
-        android:layout_marginBottom="120dp"
-        android:src="@drawable/pin" />
+    <com.example.blackbox.DistanceRadarView
+        android:id="@+id/radarView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#0A1A3A" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Box 0 – 10 m -->
+        <ImageView
+            android:id="@+id/imageView0"
+            style="@style/boxInChallenge"
+            android:backgroundTint="@color/puzzle15"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Box 1 – 100 m -->
+        <ImageView
+            android:id="@+id/imageView1"
+            style="@style/boxInChallenge"
+            android:backgroundTint="@color/puzzle15"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Box 2 – 1 km -->
+        <ImageView
+            android:id="@+id/imageView2"
+            style="@style/boxInChallenge"
+            android:backgroundTint="@color/puzzle15"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Box 3 – 10 km -->
+        <ImageView
+            android:id="@+id/imageView3"
+            style="@style/boxInChallenge"
+            android:backgroundTint="@color/puzzle15"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <ImageView
+            android:id="@+id/pinIcon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="120dp"
+            android:src="@drawable/pin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </RelativeLayout>

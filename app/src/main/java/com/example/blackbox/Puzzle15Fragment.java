@@ -1,125 +1,175 @@
-//package com.example.blackbox;
-//
-//import android.Manifest;
-//import android.content.Context;
-//import android.content.SharedPreferences;
-//import android.content.pm.PackageManager;
-//import android.location.Location;
-//import android.location.LocationListener;
-//import android.location.LocationManager;
-//import android.os.Bundle;
-//import android.view.LayoutInflater;
-//import android.view.View;
-//import android.view.ViewGroup;
-//
-//import androidx.annotation.NonNull;
-//import androidx.core.content.ContextCompat;
-//
-//public class Puzzle15Fragment extends PuzzleBaseFragment {
-//
-//    private LocationManager locationManager;
-//    private Location lastLocation = null;
-//    private double totalDistance = 0; // Đơn vị: Mét
-//    private DistanceRadarView radarView;
-//    private SharedPreferences prefs;
-//
-//    private boolean[] isSolved = new boolean[4];
-//
-//    @Override
-//    public int getPuzzleId() { return 15; }
-//
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        return inflater.inflate(R.layout.activity_puzzle15, container, false);
-//    }
-//
-//    @Override
-//    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-//        super.onViewCreated(view, savedInstanceState);
-//        radarView = view.findViewById(R.id.radarView);
-//
-//        prefs = requireContext().getSharedPreferences(getString(R.string.pref), Context.MODE_PRIVATE);
-//        totalDistance = prefs.getFloat("puzzle15_distance", 0f);
-//        radarView.setDistance(totalDistance);
-//
-//        if (totalDistance >= 10) { isSolved[0] = true; radarView.setSolved(0); }
-//        if (totalDistance >= 100) { isSolved[1] = true; radarView.setSolved(1); }
-//        if (totalDistance >= 1000) { isSolved[2] = true; radarView.setSolved(2); }
-//        if (totalDistance >= 10000) { isSolved[3] = true; radarView.setSolved(3); }
-//    }
-//
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION }, 100);
-//        } else {
-//            startTracking();
-//        }
-//    }
-//
-//    private void startTracking() {
-//        locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-//        if (locationManager != null) {
-//            try {
-//                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 2f, locationListener);
-//            } catch (SecurityException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//
-//    private final LocationListener locationListener = new LocationListener() {
-//        @Override
-//        public void onLocationChanged(@NonNull Location location) {
-//            if (lastLocation != null) {
-//                totalDistance += lastLocation.distanceTo(location);
-//                prefs.edit().putFloat("puzzle15_distance", (float) totalDistance).apply();
-//
-//                if (radarView != null) radarView.setDistance(totalDistance);
-//                checkWinConditions();
-//            }
-//            lastLocation = location;
-//        }
-//    };
-//
-//    private void checkWinConditions() {
-//        if (totalDistance >= 10 && !isSolved[0]) {
-//            isSolved[0] = true;
-//            radarView.setSolved(0);
-//            saveBoxCompleted(0);
-//        }
-//        if (totalDistance >= 100 && !isSolved[1]) {
-//            isSolved[1] = true;
-//            radarView.setSolved(1);
-//            saveBoxCompleted(1);
-//        }
-//        if (totalDistance >= 1000 && !isSolved[2]) {
-//            isSolved[2] = true;
-//            radarView.setSolved(2);
-//            saveBoxCompleted(2);
-//        }
-//        if (totalDistance >= 10000 && !isSolved[3]) {
-//            isSolved[3] = true;
-//            radarView.setSolved(3);
-//            saveBoxCompleted(3);
-//
-//            if (locationManager != null) {
-//                locationManager.removeUpdates(locationListener);
-//            }
-//
-//            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-//                if (getActivity() != null && isAdded()) {
-//                    getActivity().onBackPressed();
-//                }
-//            }, 1500);
-//        }
-//    }
-//    @Override
-//    public void onDestroyView() {
-//        super.onDestroyView();
-//        if (locationManager != null) {
-//            locationManager.removeUpdates(locationListener);
-//        }
-//    }
-//}
+package com.example.blackbox;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+
+public class Puzzle15Fragment extends PuzzleBaseFragment {
+
+    private static final double[] MILESTONES  = { 10, 100, 1000, 10000 };
+    private static final int TOTAL_BOXES = 4;
+
+    private final ImageView[] boxes  = new ImageView[TOTAL_BOXES];
+    private final int[] boxIds = {
+            R.id.imageView0,
+            R.id.imageView1,
+            R.id.imageView2,
+            R.id.imageView3
+    };
+
+    private LocationManager locationManager;
+    private Location lastLocation = null;
+    private double totalDistance = 0;
+    private DistanceRadarView radarView;
+
+
+    @Override public int getPuzzleId()    { return 15; }
+    @Override public int getTotalBoxes()  { return TOTAL_BOXES; }
+
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.activity_puzzle15, container, false);
+
+        for (int i = 0; i < boxes.length; i++) {
+            boxes[i] = root.findViewById(boxIds[i]);
+        }
+        radarView = root.findViewById(R.id.radarView);
+
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        SharedPreferences prefs = requireContext()
+                .getSharedPreferences(getString(R.string.pref), Context.MODE_PRIVATE);
+        totalDistance = prefs.getFloat("puzzle15_distance", 0f);
+
+        radarView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        radarView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        positionBoxes();
+                        syncProgress();
+                    }
+                }
+        );
+
+        if (radarView != null) radarView.setDistance(totalDistance);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION }, 100);
+        } else {
+            startTracking();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopTracking();
+    }
+
+    private void positionBoxes() {
+        if (radarView == null) return;
+        int   radarH = radarView.getHeight();
+        float boxHalf = (int) (37.5f * getResources().getDisplayMetrics().density);
+
+        for (int i = 0; i < TOTAL_BOXES; i++) {
+            float ringTopY = DistanceRadarView.getRingTopY(i, radarH);
+            boxes[i].setY(ringTopY - boxHalf);
+            boxes[i].setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void syncProgress() {
+        for (int index : getCompletedThisRun()) {
+            applyCurrentProgress(boxes[index]);
+            if (radarView != null) radarView.setSolved(index);
+        }
+    }
+
+
+    private void startTracking() {
+        locationManager = (LocationManager) requireContext()
+                .getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) return;
+        try {
+            locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 3000, 2f, locationListener);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void stopTracking() {
+        if (locationManager != null) {
+            locationManager.removeUpdates(locationListener);
+            locationManager = null;
+        }
+    }
+
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(@NonNull Location location) {
+            if (lastLocation != null) {
+                totalDistance += lastLocation.distanceTo(location);
+
+                requireContext()
+                        .getSharedPreferences(getString(R.string.pref), Context.MODE_PRIVATE)
+                        .edit()
+                        .putFloat("puzzle15_distance", (float) totalDistance)
+                        .apply();
+
+                if (radarView != null) radarView.setDistance(totalDistance);
+                checkMilestones();
+            }
+            lastLocation = location;
+        }
+    };
+
+    private void checkMilestones() {
+        for (int i = 0; i < MILESTONES.length; i++) {
+            if (totalDistance >= MILESTONES[i]) {
+                final int index = i;
+
+                updatePuzzle(boxes[index], index);
+
+                if (getCompletedThisRun().contains(index) && radarView != null) {
+                    radarView.setSolved(index);
+                }
+            }
+        }
+
+        if (isPuzzleCompletedThisRun()) {
+            stopTracking();
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (getActivity() != null && isAdded()) {
+                    getActivity().finish();
+                }
+            }, 1500);
+        }
+    }
+}
