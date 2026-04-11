@@ -104,10 +104,10 @@ if (gravityZ > THRESHOLD) {
 - Changes:
   - Puzzle1Fragment.java:
     - Added custom view FluidView for flat fluid simulation (using only gravityX and gravityY).
-    - Box positions become more intuitive.
+    - Boxes positions became more intuitive.
   - Added bubbles that work with gravityZ.
 ### 3.2. Puzzle Fragment 29
-- Context: Old logic Changes UI over time by looping through a new timer 50 times (what the fuck).
+- Context: Old logic changes UI over time by looping through a timer 50 times (the timer value was also re-assigned every loop).
 - Changes:
   - Runs an animation that gradually change the background from start color to final color, cancel that animation upon letting go.
   - Once animation ends without being cancelled, updatePuzzle.
