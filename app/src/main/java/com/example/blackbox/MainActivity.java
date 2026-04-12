@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         AudioHandler.startBgm(this);  // Play BGM in menu
 
         // UPDATE SOLVED BOXES
-        SharedPreferences pref = getSharedPreferences(getString(R.string.pref), MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences(getString(R.string.prefCompletion), MODE_PRIVATE);
         String solved = pref.getString(getString(R.string.prefSolved), "[]");
         try {
             JSONArray jsonArray = new JSONArray(solved);
@@ -138,9 +138,10 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("Xác nhận Reset")
                 .setMessage("Hành động này sẽ xóa toàn bộ tiến trình chơi của bạn. Bạn có chắc chắn không?")
                 .setPositiveButton("Xóa hết", (dialog, which) -> {
-                    SharedPreferences pref = getSharedPreferences(getString(R.string.pref), MODE_PRIVATE);
-                    pref.edit().putString(getString(R.string.prefSolved), "[]").apply();
-                    pref.edit().putFloat("puzzle15_distance", 0f).apply();
+
+                    // Clear progress and completion
+                    PuzzleCompletion.resetAllCompletion(this);
+                    PuzzleProgress.resetAllProgress(this);
 
                     recreate();
                 })
