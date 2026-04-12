@@ -22,7 +22,7 @@ public class FluidView extends View {
     private final Paint fluidPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path fluidPath = new Path();
 
-    private static final float FILL_RATIO = 0.6f;
+    private static final float FILL_RATIO = 0.7f;
     private static final float BINARY_SEARCH_EPSILON = 0.5f;
 
     public FluidView(Context context, AttributeSet attrs) {
