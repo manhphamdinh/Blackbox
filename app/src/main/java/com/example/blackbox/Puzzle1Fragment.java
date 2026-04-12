@@ -8,8 +8,10 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -49,7 +51,7 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
     private FluidView fluid;
     private ImageView bubbleTop;
     private ImageView bubbleBottom;
-
+    private WindowManager windowManager;
     private SensorManager mSensorManager;
 
     @Override
@@ -88,6 +90,7 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
     @Override
     public void onResume() {
         super.onResume();
+        windowManager = (WindowManager) requireContext().getSystemService(Context.WINDOW_SERVICE);
         mSensorManager = (SensorManager) requireContext().getSystemService(Context.SENSOR_SERVICE);
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
@@ -117,25 +120,32 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
                 gravityZ * gravityZ
         );
 
+        // Screen rotation
+        int rotation = windowManager.getDefaultDisplay().getRotation();
+
+        float[] adjusted = new float[2];
+        adjustForRotation(gravityX, gravityY, rotation, adjusted);
+
+
         // UPDATE FLUID AND BUBBLES UI
-        fluid.setGravity(gravityX, gravityY);
+        fluid.setGravity(adjusted[0], adjusted[1]);
 
         updateBubbles(maxGravity, gravityZ, bubbleTop, bubbleBottom);
 
         // Kiểm tra hoàn thành puzzle
-        if (gravityX < -THRESHOLD) {
+        if (adjusted[0] < -THRESHOLD) {
             updatePuzzle(boxes[RIGHT], RIGHT);
             Log.d("PUZZLE 1", "NEGATIVE X");
         }
-        if (gravityX > THRESHOLD) {
+        if (adjusted[0] > THRESHOLD) {
             updatePuzzle(boxes[LEFT], LEFT);
         }
-        if (gravityY < -THRESHOLD) {
+        if (adjusted[1] < -THRESHOLD) {
             updatePuzzle(boxes[TOP], TOP);
             Log.d("PUZZLE 1", "NEGATIVE Y");
 
         }
-        if (gravityY > THRESHOLD) {
+        if (adjusted[1] > THRESHOLD) {
             updatePuzzle(boxes[BOTTOM], BOTTOM);
         }
         if (gravityZ < -THRESHOLD) {
@@ -149,6 +159,30 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
         getView().findViewById(R.id.ll).invalidate();
     }
 
+    private void adjustForRotation(float x, float y, int rotation, float[] out) {
+        switch (rotation) {
+            case Surface.ROTATION_90:
+                out[0] = -y;
+                out[1] =  x;
+                break;
+
+            case Surface.ROTATION_180:
+                out[0] = -x;
+                out[1] = -y;
+                break;
+
+            case Surface.ROTATION_270:
+                out[0] =  y;
+                out[1] = -x;
+                break;
+
+            case Surface.ROTATION_0:
+            default:
+                out[0] = x;
+                out[1] = y;
+                break;
+        }
+    }
 
     private void updateBubbles(float maxGravity,float gravityZ, ImageView bubbleTop, ImageView bubbleBottom) {
 
