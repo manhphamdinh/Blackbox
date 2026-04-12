@@ -7,11 +7,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 public class PuzzleCompletion {
-
     private final Context context;
     private final String solvedKey;
 
-    public PuzzleCompletion(Context context, int puzzleId) {
+    public PuzzleCompletion(Context context) {
         this.context = context;
         this.solvedKey = context.getString(R.string.prefSolved);
     }
@@ -20,8 +19,7 @@ public class PuzzleCompletion {
         String tag = puzzleId + ":" + boxIndex;
 
         SharedPreferences pref = context.getSharedPreferences(
-                context.getString(R.string.pref), Context.MODE_PRIVATE
-        );
+                context.getString(R.string.prefCompletion), Context.MODE_PRIVATE);
 
         String existing = pref.getString(solvedKey, "[]");
 
@@ -36,5 +34,12 @@ public class PuzzleCompletion {
             pref.edit().putString(solvedKey, array.toString()).apply();
 
         } catch (JSONException ignored) {}
+    }
+
+    public static void resetAllCompletion(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(
+                context.getString(R.string.prefCompletion), Context.MODE_PRIVATE);
+
+        pref.edit().clear().apply();
     }
 }

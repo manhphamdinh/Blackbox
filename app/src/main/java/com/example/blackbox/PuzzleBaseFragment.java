@@ -81,7 +81,7 @@ public abstract class PuzzleBaseFragment extends Fragment {
         if (context == null) { return; }
 
         progress = new PuzzleProgress(context, getPuzzleId(), getTotalBoxes());
-        completion = new PuzzleCompletion(context, getPuzzleId());
+        completion = new PuzzleCompletion(context);
 
         if (progress.isComplete()) {
             progress.resetPuzzleProgress();
