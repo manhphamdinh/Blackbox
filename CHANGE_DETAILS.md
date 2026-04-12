@@ -103,11 +103,11 @@ if (gravityZ > THRESHOLD) {
   - Diabolical fluid parameters (activity_puzzle1.xml).
 - Changes:
   - Puzzle1Fragment.java:
-    - Added custom view FluidView for flat fluid simulation (using only gravityX and gravityY).
-    - Boxes positions became more intuitive.
+    - Added custom view FluidView for flat fluid simulation (uses only gravityX and gravityY).
+    - Boxes positions become more intuitive.
   - Added bubbles that work with gravityZ.
 ### 3.2. Puzzle Fragment 29
 - Context: Old logic changes UI over time by looping through a timer 50 times (the timer value was also re-assigned every loop).
 - Changes:
-  - Runs an animation that gradually change the background from start color to final color, cancel that animation upon letting go.
+  - Runs an animation that gradually change the background from start color to end color, cancel that animation if conditions aren't met.
   - Once animation ends without being cancelled, updatePuzzle.
