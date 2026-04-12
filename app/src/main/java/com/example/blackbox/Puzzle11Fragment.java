@@ -34,7 +34,7 @@ public class Puzzle11Fragment extends PuzzleBaseFragment {
 
     // ================== DEBUG MODE =============
     private static final boolean DEBUG_MODE = false;
-    private static final double DEBUG_PHASE = 0.0;
+    private static final double DEBUG_PHASE_NORMALIZED = 0.0f; // 0 -> 1
     // ===========================================
 
     private View shadow;
@@ -45,7 +45,7 @@ public class Puzzle11Fragment extends PuzzleBaseFragment {
         @Override
         public void run() {
             updateMoon();
-            handler.postDelayed(this, PHASE_CHECK_DELAY); // update every 2 seconds
+            handler.postDelayed(this, PHASE_CHECK_DELAY);
         }
     };
 
@@ -69,6 +69,8 @@ public class Puzzle11Fragment extends PuzzleBaseFragment {
             boxes[i] = root.findViewById(boxIds[i]);
         }
 
+        shadow = root.findViewById(R.id.moonShadow);
+
         return root;
     }
 
@@ -79,8 +81,6 @@ public class Puzzle11Fragment extends PuzzleBaseFragment {
         for (int index : getCompletedThisRun()) {
             applyCurrentProgress(boxes[index]);
         }
-
-        shadow = view.findViewById(R.id.moonShadow);
     }
 
     @Override
@@ -98,57 +98,51 @@ public class Puzzle11Fragment extends PuzzleBaseFragment {
     private void updateMoon() {
         MoonIllumination moon = MoonIllumination.compute().now().execute();
 
-        double phase = moon.getPhase() / 360.0;
-        double fraction = moon.getFraction();
+        double phaseNormalized = moon.getPhase() / 360.0;
 
         if (DEBUG_MODE)
         {
-            phase = DEBUG_PHASE;
+            phaseNormalized = DEBUG_PHASE_NORMALIZED;
         }
 
-        Log.d("MOON", "Phase normalized: " + phase);
-        Log.d("MOON", "Fraction: " + fraction);
+        Log.d("MOON", "Phase normalized: " + phaseNormalized);
 
-        renderMoon(phase);
-        checkPuzzleCompletion(phase);
+        updateShadowPosition(phaseNormalized);
+        checkPuzzleCompletion(phaseNormalized);
     }
 
-    private void renderMoon(double phase) {
+    private void updateShadowPosition(double phaseNormalized) {
         if (shadow == null) return;
 
         shadow.post(() -> {
             float width = shadow.getWidth();
 
-            // Horizontal shift (-1 → 1)
-            float shift = (float) ((phase - 0.5f) * 2f);
+            float shift;
 
-            // Shadow size (avoid disappearing completely)
-            float scale = Math.max(0.05f,
-                    (float) Math.abs(Math.cos(phase * Math.PI)));
-
-            shadow.setTranslationX(shift * width / 2f);
-
-            // Lighting direction
-            if (phase < 0.5) {
-                shadow.setPivotX(0); // left side
+            if (phaseNormalized <= 0.5) {
+                // NEW → FULL (center → left)
+                float t = (float)(phaseNormalized / 0.5); // 0 → 1
+                shift = -t; // 0 → -1
             } else {
-                shadow.setPivotX(width); // right side
+                // FULL → NEW (right → center)
+                float t = (float)((phaseNormalized - 0.5) / 0.5); // 0 → 1
+                shift = 1 - t; // 1 → 0
             }
 
-            shadow.setScaleX(scale);
+            shadow.setTranslationX(shift * width / 2f);
             shadow.setAlpha(0.9f);
         });
     }
 
-    private void checkPuzzleCompletion(double phase) {
+    private void checkPuzzleCompletion(double phaseNormalized) {
 
         // 🌑 New Moon (phase ≈ 0 or 100%)
-        if (phase <= PHASE_TOLERANCE || phase >= (1 - PHASE_TOLERANCE)) {
+        if (phaseNormalized <= PHASE_TOLERANCE || phaseNormalized >= (1 - PHASE_TOLERANCE)) {
             updatePuzzle(boxes[LEFT], LEFT);
         }
 
-        // 🌕 Full Moon (phase ≈ 50%)
-        else if (phase >= FULL_MOON - PHASE_TOLERANCE && phase <= FULL_MOON + PHASE_TOLERANCE) {
+        // 🌕 Full Moon (phaseNormalized ≈ 50%)
+        else if (phaseNormalized >= FULL_MOON - PHASE_TOLERANCE && phaseNormalized <= FULL_MOON + PHASE_TOLERANCE) {
             updatePuzzle(boxes[RIGHT], RIGHT);
         }
     }
