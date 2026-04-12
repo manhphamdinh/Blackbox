@@ -2,12 +2,12 @@ package com.example.blackbox;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +20,8 @@ import androidx.core.content.ContextCompat;
 public class Puzzle15Fragment extends PuzzleBaseFragment {
 
     private static final double[] MILESTONES  = { 10, 100, 1000, 10000 };
-    private static final int TOTAL_BOXES = 4;
 
-    private final ImageView[] boxes  = new ImageView[TOTAL_BOXES];
+    private final ImageView[] boxes  = new ImageView[4];
     private final int[] boxIds = {
             R.id.imageView0,
             R.id.imageView1,
@@ -36,10 +35,11 @@ public class Puzzle15Fragment extends PuzzleBaseFragment {
     private DistanceRadarView radarView;
 
 
-    @Override public int getPuzzleId()    { return 15; }
-    @Override public int getTotalBoxes()  { return TOTAL_BOXES; }
+    @Override
+    public int getPuzzleId() { return 15; }
 
-
+    @Override
+    public int getTotalBoxes()  { return boxes.length; }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,17 +57,23 @@ public class Puzzle15Fragment extends PuzzleBaseFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        SharedPreferences prefs = requireContext()
-                .getSharedPreferences(getString(R.string.pref), Context.MODE_PRIVATE);
-        totalDistance = prefs.getFloat("puzzle15_distance", 0f);
+        syncProgress();
+
+        ImageView pin = view.findViewById(R.id.pinIcon);
 
         radarView.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
                         radarView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        positionBoxes();
+                        placeBoxes();
                         syncProgress();
+
+                        // Place pin
+                        pin.setX((radarView.getWidth() / 2f) - (pin.getWidth() / 2f));
+                        pin.setY((radarView.getHeight() * 0.80f) - pin.getHeight());
+
+                        pin.setVisibility(View.VISIBLE);
                     }
                 }
         );
@@ -92,12 +98,12 @@ public class Puzzle15Fragment extends PuzzleBaseFragment {
         stopTracking();
     }
 
-    private void positionBoxes() {
+    private void placeBoxes() {
         if (radarView == null) return;
-        int   radarH = radarView.getHeight();
-        float boxHalf = (int) (37.5f * getResources().getDisplayMetrics().density);
+        int radarH = radarView.getHeight();
+        float boxHalf = 37.5f * getResources().getDisplayMetrics().density;
 
-        for (int i = 0; i < TOTAL_BOXES; i++) {
+        for (int i = 0; i < boxes.length; i++) {
             float ringTopY = DistanceRadarView.getRingTopY(i, radarH);
             boxes[i].setY(ringTopY - boxHalf);
             boxes[i].setVisibility(View.VISIBLE);
@@ -105,10 +111,14 @@ public class Puzzle15Fragment extends PuzzleBaseFragment {
     }
 
     private void syncProgress() {
-        for (int index : getCompletedThisRun()) {
-            applyCurrentProgress(boxes[index]);
-            if (radarView != null) radarView.setSolved(index);
+        for (int boxIndex : getCompletedThisRun()) {
+            applyCurrentProgress(boxes[boxIndex]);
+            if (radarView != null) { radarView.setSolved(boxIndex); }
         }
+
+        totalDistance = requireContext()
+                .getSharedPreferences(getString(R.string.prefProgress), Context.MODE_PRIVATE)
+                .getFloat("puzzle15_distance", 0f);
     }
 
 
@@ -120,7 +130,7 @@ public class Puzzle15Fragment extends PuzzleBaseFragment {
             locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER, 3000, 2f, locationListener);
         } catch (SecurityException e) {
-            e.printStackTrace();
+            Log.d("PUZZLE 15", "Location permission error", e);
         }
     }
 
@@ -138,7 +148,7 @@ public class Puzzle15Fragment extends PuzzleBaseFragment {
                 totalDistance += lastLocation.distanceTo(location);
 
                 requireContext()
-                        .getSharedPreferences(getString(R.string.pref), Context.MODE_PRIVATE)
+                        .getSharedPreferences(getString(R.string.prefProgress), Context.MODE_PRIVATE)
                         .edit()
                         .putFloat("puzzle15_distance", (float) totalDistance)
                         .apply();
@@ -153,12 +163,10 @@ public class Puzzle15Fragment extends PuzzleBaseFragment {
     private void checkMilestones() {
         for (int i = 0; i < MILESTONES.length; i++) {
             if (totalDistance >= MILESTONES[i]) {
-                final int index = i;
+                updatePuzzle(boxes[i], i);
 
-                updatePuzzle(boxes[index], index);
-
-                if (getCompletedThisRun().contains(index) && radarView != null) {
-                    radarView.setSolved(index);
+                if (getCompletedThisRun().contains(i) && radarView != null) {
+                    radarView.setSolved(i);
                 }
             }
         }
