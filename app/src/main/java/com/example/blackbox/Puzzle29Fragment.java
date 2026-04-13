@@ -1,71 +1,126 @@
 package com.example.blackbox;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class Puzzle29Fragment extends PuzzleBaseFragment {
 
-    private static final int THRESHOLD = 5000;
-    private Timer timer;
+    private ImageView holdBox;
+    private View backGround;
 
-    @Override
-    public int getPuzzleId() { return 29; }
+    // How long the user must hold (ms)
+    private static final int HOLD_DURATION_MS = 3000;
 
+    private ValueAnimator backGroundAnimator;
+    private final int backgroundStartColor = Color.parseColor("#000000");
+    private final int backGroundEndColor = Color.parseColor("#AA94467C");
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_puzzle29, container, false);
+    protected int getTotalBoxes() {
+        return 1;
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public int getPuzzleId() {
+        return 29;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.activity_puzzle29, container, false);
+
+        holdBox = root.findViewById(R.id.imageView0);
+        backGround = root.findViewById(R.id.bg);
+
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         setupCoinButton(requireActivity().getWindow().getDecorView().getRootView());
+
         view.setOnTouchListener((v, event) -> {
-            switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_DOWN: {
-                    timer = new Timer();
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            animation(0);
-                        }
-                    }, THRESHOLD);
-                    final int reps = 50;
-                    for (int i = 0; i < reps; i++) {
-                        final int step = i;
-                        timer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                if (getActivity() == null || getView() == null) return;
-                                int r = 0x94 * step / reps;
-                                int g = 0x46 * step / reps;
-                                int b = 0x7C * step / reps;
-                                String hex = String.format("#99%02X%02X%02X", r, g, b);
-                                getActivity().runOnUiThread(() ->
-                                        getView().findViewById(R.id.bg)
-                                                .setBackgroundColor(Color.parseColor(hex))
-                                );
-                            }
-                        }, (long) step * THRESHOLD / reps);
-                    }
-                    break;
-                }
-                case MotionEvent.ACTION_UP: {
-                    if (getView() != null)
-                        getView().findViewById(R.id.bg)
-                                .setBackgroundColor(requireContext().getResources().getColor(R.color.bg, null));
-                    if (timer != null) timer.cancel();
-                    break;
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    startHoldAnimation();
+
+                    return true;
+
+                case MotionEvent.ACTION_UP:
+                    cancelHoldAnimation();
+                    resetBackgroundColor();
+                    v.performClick();
+
+                    return true;
+
+                case MotionEvent.ACTION_CANCEL:
+
+                    cancelHoldAnimation();
+                    resetBackgroundColor();
+
+                    return true;
+            }
+            return false;
+        });
+    }
+
+    // HOLD ANIMATIONS
+    private void cancelHoldAnimation() {
+        if (backGroundAnimator != null) {
+            backGroundAnimator.cancel(); // prevents completion trigger
+        }
+    }
+
+    private void startHoldAnimation() {
+        cancelHoldAnimation();
+
+        backGroundAnimator = ValueAnimator.ofArgb(backgroundStartColor, backGroundEndColor);
+        backGroundAnimator.setDuration(HOLD_DURATION_MS);
+
+        backGroundAnimator.addUpdateListener(animation ->
+                backGround.setBackgroundColor((int) animation.getAnimatedValue())
+        );
+
+        // Animation can end by either cancel or complete it, this ensures that
+        // Only by completing would the puzzle get updated
+        backGroundAnimator.addListener(new AnimatorListenerAdapter() {
+            private boolean wasCancelled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                wasCancelled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!wasCancelled) {
+                    updatePuzzle(holdBox);
                 }
             }
-            return true;
         });
+
+        backGroundAnimator.start();
+    }
+
+    private void resetBackgroundColor() {
+        backGround.setBackgroundColor(backgroundStartColor);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        cancelHoldAnimation();
     }
 }

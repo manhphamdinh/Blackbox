@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity {
+
+    // GET VIEWS BY TAG
     static ArrayList<ImageView> getViewsByTag(ViewGroup root, String tag) {
         ArrayList<ImageView> imageViews = new ArrayList<>();
 
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         return imageViews;
     }
 
+    // GET DEVICE HEIGHT AND WIDTH
     static Pair<Integer, Integer> getDeviceHeightAndWidth(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -49,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        // INITIALIZE ACTIVITY
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -61,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO}, 1);
         }
+
+        // INITIALIZE AUDIO MANAGER
+        AudioHandler.init(this);
     }
 
     private void updateCoinDisplay() {
@@ -84,13 +92,16 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
+    // UPDATE UI WHEN USER GOES BACK TO MAIN MENU
     @Override
     protected void onResume() {
         super.onResume();
         updateCoinDisplay();
-        SharedPreferences pref = getSharedPreferences(getString(R.string.pref), MODE_PRIVATE);
-        String solved = pref.getString(getString(R.string.prefSolved), "[]");
+        AudioHandler.startBgm(this);  // Play BGM in menu
 
+        // UPDATE SOLVED BOXES
+        SharedPreferences completionPref = getSharedPreferences(getString(R.string.prefCompletion), MODE_PRIVATE);
+        String solved = completionPref.getString(getString(R.string.prefSolved), "[]");
         try {
             JSONArray jsonArray = new JSONArray(solved);
             HashSet<String> solvedBoxes = new HashSet<>();
@@ -99,14 +110,19 @@ public class MainActivity extends AppCompatActivity {
             }
 
             ViewGroup grid = findViewById(R.id.ll);
-
             int childCount = grid.getChildCount();
             for (int i = 0; i < childCount; i++) {
                 View child = grid.getChildAt(i);
-                if (!(child instanceof ImageButton)) continue;
+                if (!(child instanceof ImageButton)) {
+                    continue;
+                }
+
                 Object tag = child.getTag();
-                if (tag == null) continue;
-                String tagStr = tag.toString(); // dạng "1:0"
+                if (tag == null) {
+                    continue;
+                }
+
+                String tagStr = tag.toString();
                 if (solvedBoxes.contains(tagStr)) {
                     ((ImageView) child).setImageResource(R.drawable.filled);
                 } else {
@@ -116,12 +132,50 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException ignored) {}
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        AudioHandler.pauseBgm();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        AudioHandler.release();
+    }
+
+    // LAUNCH PUZZLE
     public void puzzleLaunch(View view) {
+        AudioHandler.pauseBgm();            // Stop music BEFORE entering level
+        AudioHandler.playLevelSelectSFX();  // Level select sound
+
         String tag = (String) view.getTag();
+        if (tag == null) return;
+
+        // tag có dạng "puzzleId:boxIndex", lấy puzzle id
         int puzzleId = Integer.parseInt(tag.split(":")[0]);
 
+        // Launch puzzle
         Intent intent = new Intent(this, PuzzleActivity.class);
         intent.putExtra(PuzzleActivity.EXTRA_PUZZLE_ID, puzzleId);
         startActivity(intent);
+    }
+
+    public void resetGame(View view) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Xác nhận Reset")
+                .setMessage("Hành động này sẽ xóa toàn bộ tiến trình chơi của bạn. Bạn có chắc chắn không?")
+                .setPositiveButton("Xóa hết", (dialog, which) -> {
+
+                    // Clear progress and completion
+                    PuzzleCompletion.resetAllCompletion(this);
+                    PuzzleProgress.resetAllProgress(this);
+
+                    recreate();
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
     }
 }

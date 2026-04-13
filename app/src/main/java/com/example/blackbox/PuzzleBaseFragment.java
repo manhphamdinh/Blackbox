@@ -3,57 +3,108 @@ package com.example.blackbox;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import java.util.HashSet;
 
 public abstract class PuzzleBaseFragment extends Fragment {
 
-    protected void animation(int index) {
+    // Runtime only
+    /// Set of completed boxes in current puzzle
+    private final HashSet<Integer> completedThisRun = new HashSet<>();
+
+    /// Current puzzle status
+    private boolean puzzleCompletedThisRun = false;
+    private PuzzleProgress progress;
+    private PuzzleCompletion completion;
+
+    // CORE
+    protected void updatePuzzle(ImageView puzzleBox){
+        updatePuzzle(puzzleBox, 0);
+    }
+    protected void updatePuzzle(ImageView puzzleBox, int boxIndex) {
+
+        // Prevent replaying audio
+        if (completedThisRun.contains(boxIndex)) { return; }
+        completedThisRun.add(boxIndex);
+
         Activity activity = getActivity();
-        if (activity == null) return;
+        if (activity == null) { return; }
+
+        if (progress.isComplete()) { return; }
+
+        // Save states
+        completion.markCompleted(getPuzzleId(), boxIndex);
+        progress.savePuzzleProgress(boxIndex);
+
+        // Render UI + AUDIO
         activity.runOnUiThread(() -> {
-            android.widget.ImageView imageView = activity.findViewById(
-                    activity.getResources().getIdentifier("imageView" + index, "id", activity.getPackageName())
-            );
-            if (imageView == null) return;
-            imageView.setBackgroundResource(R.drawable.animation);
-            ((AnimationDrawable) imageView.getBackground()).start();
-            saveBoxCompleted(index);
+            playAnimation(puzzleBox);
+            handleAudio();
         });
     }
 
-    private void saveBoxCompleted(int boxIndex) {
-        Context context = getContext();
-        if (context == null) return;
-        String key = getPuzzleId() + ":" + boxIndex;
-        SharedPreferences pref = context.getSharedPreferences(
-                getString(R.string.pref), Context.MODE_PRIVATE
-        );
-        String existing = pref.getString(getString(R.string.prefSolved), "[]");
-        try {
-            JSONArray jsonArray = new JSONArray(existing);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                if (jsonArray.getString(i).equals(key)) return;
+    // AUDIO
+    private void handleAudio() {
+        if (progress.isComplete()) {
+            if (!puzzleCompletedThisRun) {
+                puzzleCompletedThisRun = true;
+                AudioHandler.playPuzzleCompleteSFX();
             }
-            jsonArray.put(key);
-            pref.edit().putString(getString(R.string.prefSolved), jsonArray.toString()).apply();
-        } catch (JSONException ignored) {}
+        }
+        else {
+            AudioHandler.playBoxCompleteSFX();
+        }
     }
 
-    /**
-     * Gọi hàm này trong onViewCreated() của từng PuzzleFragment
-     * để gắn coin button vào layout (nếu layout có view id=coinButton và coinCount).
-     */
+    // UI
+    private void playAnimation(ImageView puzzleBox) {
+        puzzleBox.setBackgroundResource(R.drawable.animation);
+        ((AnimationDrawable) puzzleBox.getBackground()).start();
+    }
+
+    protected void applyCurrentProgress(ImageView box) {
+        playAnimation(box);
+    }
+
+    // LIFECYCLE
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Context context = getContext();
+        if (context == null) { return; }
+
+        progress = new PuzzleProgress(context, getPuzzleId(), getTotalBoxes());
+        completion = new PuzzleCompletion(context);
+
+        if (progress.isComplete()) {
+            progress.resetPuzzleProgress();
+            return;
+        }
+
+        completedThisRun.clear();
+        completedThisRun.addAll(progress.getPuzzleCurrentProgress());
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (progress.isComplete()) {
+            progress.resetPuzzleProgress();
+        }
+    }
+
+    // HINTS
     protected void setupCoinButton(View rootView) {
         Context context = getContext();
         if (context == null) return;
@@ -71,9 +122,6 @@ public abstract class PuzzleBaseFragment extends Fragment {
         }
     }
 
-    /**
-     * Hiển thị dialog chọn hint (3 hint/level, mỗi hint 2 xu)
-     */
     protected void showHintDialog() {
         Context context = getContext();
         if (context == null) return;
@@ -95,14 +143,11 @@ public abstract class PuzzleBaseFragment extends Fragment {
 
         builder.setItems(hintLabels, (dialog, which) -> {
             if (HintManager.isHintUnlocked(context, puzzleId, which)) {
-                // Đã mở, hiện nội dung
                 showHintContent(puzzleId, which);
             } else {
-                // Chưa mở, thử trừ xu
                 boolean success = HintManager.unlockHint(context, puzzleId, which);
                 if (success) {
                     showHintContent(puzzleId, which);
-                    // Cập nhật lại số xu trên UI
                     if (getView() != null) {
                         TextView coinCount = getView().findViewById(R.id.coinCount);
                         if (coinCount != null) {
@@ -110,7 +155,6 @@ public abstract class PuzzleBaseFragment extends Fragment {
                         }
                     }
                 } else {
-                    // Không đủ xu
                     new AlertDialog.Builder(context)
                             .setTitle("Không đủ xu!")
                             .setMessage("Bạn cần 2 xu để mở hint này.\nHãy xem video để nhận thêm xu.")
@@ -136,15 +180,9 @@ public abstract class PuzzleBaseFragment extends Fragment {
                 .show();
     }
 
-    /**
-     * (Optional) Xem quảng cáo để nhận 1 xu.
-     * Tích hợp AdMob rewarded ad thực tế ở đây.
-     */
     protected void watchAdForCoin() {
         Context context = getContext();
         if (context == null) return;
-        // TODO: Tích hợp AdMob RewardedAd thực tế
-        // Tạm thời cộng 1 xu để test
         HintManager.addCoin(context, 1);
         Toast.makeText(context, "+1 xu!", Toast.LENGTH_SHORT).show();
         if (getView() != null) {
@@ -155,5 +193,15 @@ public abstract class PuzzleBaseFragment extends Fragment {
         }
     }
 
+    // UTILITIES
     protected abstract int getPuzzleId();
+    protected abstract int getTotalBoxes();
+
+    protected HashSet<Integer> getCompletedThisRun() {
+        return completedThisRun;
+    }
+
+    protected boolean isPuzzleCompletedThisRun() {
+        return puzzleCompletedThisRun;
+    }
 }
