@@ -14,8 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
-
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class Puzzle3Fragment extends PuzzleBaseFragment {
 
@@ -74,15 +74,14 @@ public class Puzzle3Fragment extends PuzzleBaseFragment {
         return root;
     }
 
-    // LOADS PREVIOUS PROGRESS
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         for (int index : getCompletedThisRun()) {
             applyCurrentProgress(boxes[index]);
         }
-
+        setupCoinButton(requireActivity().getWindow().getDecorView().getRootView());
     }
 
     @Override

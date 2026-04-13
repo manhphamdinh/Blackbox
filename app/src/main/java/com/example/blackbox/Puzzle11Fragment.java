@@ -78,6 +78,13 @@ public class Puzzle11Fragment extends PuzzleBaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Setup Coin Button
+        setupCoinButton(requireActivity().getWindow().getDecorView().getRootView());
+        
+        // Initialize shadow reference
+        shadow = view.findViewById(R.id.moonShadow);
+
+        // Re-apply completed boxes from this run
         for (int index : getCompletedThisRun()) {
             applyCurrentProgress(boxes[index]);
         }

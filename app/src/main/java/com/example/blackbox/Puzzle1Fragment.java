@@ -13,8 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
-
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventListener {
 
@@ -54,6 +54,8 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
     private WindowManager windowManager;
     private SensorManager mSensorManager;
 
+
+
     @Override
     protected int getTotalBoxes() {
         return boxes.length;
@@ -79,12 +81,13 @@ public class Puzzle1Fragment extends PuzzleBaseFragment implements SensorEventLi
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         for (int index : getCompletedThisRun()) {
             applyCurrentProgress(boxes[index]);
         }
+        setupCoinButton(requireActivity().getWindow().getDecorView().getRootView());
     }
 
     @Override
