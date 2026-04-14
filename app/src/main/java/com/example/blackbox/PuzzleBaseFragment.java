@@ -162,14 +162,14 @@ public abstract class PuzzleBaseFragment extends Fragment {
         int puzzleId = getPuzzleId();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Gợi ý (🪙 " + coins + " xu)");
+        builder.setTitle("Hints (🪙 " + coins + " coins)");
 
         String[] hintLabels = new String[3];
         for (int i = 0; i < 3; i++) {
             if (HintManager.isHintUnlocked(context, puzzleId, i)) {
-                hintLabels[i] = "Gợi ý " + (i + 1) + " (Đã mở)";
+                hintLabels[i] = "Hint " + (i + 1) + " (unlocked)";
             } else {
-                hintLabels[i] = "Gợi ý " + (i + 1) + " (Tốn 2 xu)";
+                hintLabels[i] = "Hint " + (i + 1) + " (2 coins)";
             }
         }
 
@@ -179,29 +179,29 @@ public abstract class PuzzleBaseFragment extends Fragment {
             } else {
                 if (HintManager.getCoins(context) >= HintManager.COINS_PER_HINT) {
                     new AlertDialog.Builder(context)
-                        .setTitle("Mở khóa gợi ý")
-                        .setMessage("Bạn có muốn dùng 2 xu để mở gợi ý này không?")
-                        .setPositiveButton("Mở", (d, w) -> {
+                        .setTitle("Unclock this hint")
+                        .setMessage("Do you want to spend 2 coins to unclock this hint?")
+                        .setPositiveButton("Sure", (d, w) -> {
                             boolean success = HintManager.unlockHint(context, puzzleId, which);
                             if (success) {
                                 updateCoinUI();
                                 showHintContent(puzzleId, which);
                             }
                         })
-                        .setNegativeButton("Hủy", null)
+                        .setNegativeButton("Cancel", null)
                         .show();
                 } else {
                     new AlertDialog.Builder(context)
-                            .setTitle("Không đủ xu!")
-                            .setMessage("Bạn cần 2 xu để mở hint này.\nHãy xem video để nhận thêm xu.")
-                            .setPositiveButton("Xem video", (d, w) -> watchAdForCoin())
-                            .setNegativeButton("Đóng", null)
+                            .setTitle("You do not have enough money \uD83D\uDCB8!")
+                            .setMessage("You need 2 coins to unclock this hint.\nWatch ads to earn some coins.")
+                            .setPositiveButton("Ok", (d, w) -> watchAdForCoin())
+                            .setNegativeButton("No", null)
                             .show();
                 }
             }
         });
 
-        builder.setNegativeButton("Đóng", null);
+        builder.setNegativeButton("No", null);
         builder.show();
     }
 
@@ -210,7 +210,7 @@ public abstract class PuzzleBaseFragment extends Fragment {
         if (context == null) return;
         String text = HintManager.getHintText(puzzleId, hintIndex);
         new AlertDialog.Builder(context)
-                .setTitle("Gợi ý " + (hintIndex + 1))
+                .setTitle("Hint " + (hintIndex + 1))
                 .setMessage(text)
                 .setPositiveButton("OK", null)
                 .show();
